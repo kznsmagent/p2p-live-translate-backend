@@ -3,8 +3,9 @@ const express = require("express");
 const http = require("http");
 const speech = require("@google-cloud/speech");
 const { TranslationServiceClient } = require("@google-cloud/translate").v3;
-const { transcribeAudioFromBase64 } = require("./transcription");
 const { translateSpeechFromBase64 } = require("./translation");
+const translateTextWithGemini = require("./translate_gemini");
+
 // --- 1. INITIALIZE CLIENTS ---
 // No key file logic needed. This works automatically in Cloud Run.
 const speechClient = new speech.SpeechClient();
@@ -74,12 +75,15 @@ IO.on("connection", (socket) => {
       const translateSource = isBurmeseSpeaker ? "my-MM" : "en-US";
       const translateTarget = isBurmeseSpeaker ? "en" : "my";
 
-      const { recognizedText, translatedText } =
-        await translateSpeechFromBase64(
-          data.audio.toString("base64"),
-          translateSource,
-          translateTarget
-        );
+      var { recognizedText, translatedText } = await translateSpeechFromBase64(
+        data.audio.toString("base64"),
+        translateSource,
+        translateTarget
+      );
+
+      if (isBurmeseSpeaker) {
+        translatedText = await translateTextWithGemini(recognizedText);
+      }
       console.log(
         `🔥 Recognized Text: ${recognizedText}\n✅Translated Text: ${translatedText}`
       );
