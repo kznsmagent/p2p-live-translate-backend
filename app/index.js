@@ -15,6 +15,8 @@ const LIVEKIT_API_KEY = process.env.LIVEKIT_API_KEY || "livekit_api_key";
 const LIVEKIT_API_SECRET =
   process.env.LIVEKIT_API_SECRET || "livekit_secret_key";
 
+console.log(`🔑 Debug Key: ${LIVEKIT_API_KEY}`);
+console.log(`🤫 Debug Secret: ${LIVEKIT_API_SECRET.substring(0, 4)}...`);
 // Generate LiveKit token endpoint
 app.post("/getToken", (req, res) => {
   const { identity, roomName } = req.body;
