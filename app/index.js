@@ -38,6 +38,7 @@ app.post("/getToken", (req, res) => {
   });
 
   const token = at.toJwt();
+  console.log(`🔥 LIVEKIT TOKEN: ${JSON.stringify(token)}`);
   res.json({ token });
 });
 
