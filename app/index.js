@@ -18,7 +18,7 @@ const LIVEKIT_API_SECRET =
 console.log(`🔑 Debug Key: ${LIVEKIT_API_KEY}`);
 console.log(`🤫 Debug Secret: ${LIVEKIT_API_SECRET.substring(0, 4)}...`);
 // Generate LiveKit token endpoint
-app.post("/getToken", (req, res) => {
+app.post("/getToken", async (req, res) => {
   const { identity, roomName } = req.body;
 
   if (!identity || !roomName) {
@@ -39,7 +39,7 @@ app.post("/getToken", (req, res) => {
     canSubscribe: true,
   });
 
-  const token = at.toJwt();
+  const token = await at.toJwt();
   console.log(`🔥 LIVEKIT TOKEN: ${JSON.stringify(token)}`);
   res.json({ token });
 });
