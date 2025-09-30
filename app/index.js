@@ -1,26 +1,55 @@
 const { Server } = require("socket.io");
 const express = require("express");
 const http = require("http");
-const speech = require("@google-cloud/speech");
-const { TranslationServiceClient } = require("@google-cloud/translate").v3;
 const { translateSpeechFromBase64 } = require("./translation");
 const translateTextWithGemini = require("./translate_gemini");
-
-// --- 1. INITIALIZE CLIENTS ---
-// No key file logic needed. This works automatically in Cloud Run.
-const speechClient = new speech.SpeechClient();
-const translationClient = new TranslationServiceClient();
-
-const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID || "speech-text-472808"; // Fallback for local
-const location = "global";
+const { AccessToken } = require("livekit-server-sdk");
 
 const app = express();
 const server = http.createServer(app);
-let adaptationResourceNames = [];
+app.use(express.json());
+
+//-------------------------------LIVEKIT-------------------
+// TODO: replace with your LiveKit API Key/Secret from dashboard
+const LIVEKIT_API_KEY = process.env.LIVEKIT_API_KEY || "livekit_api_key";
+const LIVEKIT_API_SECRET =
+  process.env.LIVEKIT_API_SECRET || "livekit_secret_key";
+
+// Generate LiveKit token endpoint
+app.post("/getToken", (req, res) => {
+  const { identity, roomName } = req.body;
+
+  if (!identity || !roomName) {
+    return res
+      .status(400)
+      .json({ error: "identity and roomName are required" });
+  }
+
+  // Create new token
+  const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
+    identity,
+  });
+
+  at.addGrant({
+    roomJoin: true,
+    room: roomName,
+    canPublish: true,
+    canSubscribe: true,
+  });
+
+  const token = at.toJwt();
+  res.json({ token });
+});
+
+// Health check
+app.get("/", (req, res) => {
+  res.send("LiveKit Node.js server running ✅");
+});
+//-------------------------------END LIVEKIT--------------
 
 const IO = new Server(server, {
   cors: {
-    origin: "*", // TODO: For production, change this to your frontend URL
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
@@ -87,58 +116,15 @@ IO.on("connection", (socket) => {
       console.log(
         `🔥 Recognized Text: ${recognizedText}\n✅Translated Text: ${translatedText}`
       );
-      /*  if (!transcription) {
-        console.log(`[${socket.user}]: Empty transcription result.`);
-        return;
-      }
-
-      console.log(`Transcription [${socket.user}]: ${transcription}`);
- */
-      // Map STT locale -> Translation ISO codes
-      // If the speaker spoke Burmese, translate Burmese ("my") -> English ("en")
-      // If the speaker spoke English, translate English ("en") -> Burmese ("my")
-      /* const isBurmeseSpeaker = sttLocale.toLowerCase().startsWith("my");
-      const translateSource = isBurmeseSpeaker ? "my" : "en";
-      const translateTarget = isBurmeseSpeaker ? "en" : "my";
-
-      const translateRequest = {
-        parent: `projects/${projectId}/locations/${location}`,
-        contents: [transcription],
-        mimeType: "text/plain",
-        sourceLanguageCode: translateSource,
-        targetLanguageCode: translateTarget,
-      };
-
-      const [translationResponse] = await translationClient.translateText(
-        translateRequest
-      );
-      const translatedText =
-        translationResponse.translations?.[0]?.translatedText || "";
-
-      if (!translatedText) {
-        console.log(`[${socket.user}]: Empty translation result.`);
-        return;
-      }
-
-      console.log(`Translated [${socket.user}]: ${translatedText}`);
 
       const resultPayload = {
-        text: transcription, // original in speaker's language
-        translated: translatedText, // translated for the other side
-        from: translateSource,
-        to: translateTarget,
-      };
- */
-      const resultPayload = {
-        text: recognizedText, // original in speaker's language
-        translated: translatedText, // translated for the other side
+        text: recognizedText,
+        translated: translatedText,
         from: socket.user,
         to: data.to,
       };
       // Send result to the peer
       if (data.to) socket.to(data.to).emit("sttResult", resultPayload);
-      // Optionally also send back to the sender so they can see what was heard
-      //socket.emit("sttResult", resultPayload);
     } catch (err) {
       console.error("Google Cloud API Error:", err);
       socket.emit("sttError", { message: "Failed to process audio." });
