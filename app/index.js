@@ -46,7 +46,7 @@ app.post("/getToken", async (req, res) => {
 
 // Health check
 app.get("/", (req, res) => {
-  res.send("LiveKit Node.js server running in get('/') ✅");
+  res.send("test LiveKit Node.js server running in get('/') ✅");
 });
 //-------------------------------END LIVEKIT--------------
 
