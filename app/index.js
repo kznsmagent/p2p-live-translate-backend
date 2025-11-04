@@ -99,7 +99,14 @@ IO.on("connection", (socket) => {
 
   socket.on("audioRecording", async (data) => {
     const sttLocale = data.language || "my-MM";
-
+    const resultPayload = {
+      text: "It's okay",
+      translated: "အိုကေပါတယ်",
+      from: socket.user,
+      to: data.to,
+    };
+    socket.to(data.to).emit("sttResult", resultPayload);
+    return;
     console.log(`Received audio from ${socket.user} for language ${sttLocale}`);
 
     try {
