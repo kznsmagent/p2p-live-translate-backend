@@ -106,6 +106,8 @@ IO.on("connection", (socket) => {
       to: data.to,
     };
     socket.to(data.to).emit("sttResult", resultPayload);
+    console.log(`Received audio and emit to  ${data.to} from ${socket.user}`);
+
     return;
     console.log(`Received audio from ${socket.user} for language ${sttLocale}`);
 
