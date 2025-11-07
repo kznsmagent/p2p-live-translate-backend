@@ -110,7 +110,7 @@ async function translateTextWithGemini(textToTranslate) {
   // ... (API key check remains the same)
 
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   // 1. Define the complete prompt
   const fullPrompt = `Translate the following Burmese sentence into English: "${textToTranslate}"`;
