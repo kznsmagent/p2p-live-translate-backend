@@ -112,12 +112,14 @@ IO.on("connection", (socket) => {
       );
 
       if (isBurmeseSpeaker) {
+        // ⭐ This line now has built-in retry logic!
         translatedText = await translateTextWithGemini(recognizedText);
       }
       console.log(
         `🔥 Recognized Text: ${recognizedText}\n✅Translated Text: ${translatedText}`
       );
 
+      // ... rest of the successful code ...
       const resultPayload = {
         text: recognizedText,
         translated: translatedText,
@@ -127,7 +129,10 @@ IO.on("connection", (socket) => {
       // Send result to the peer
       if (data.to) socket.to(data.to).emit("sttResult", resultPayload);
     } catch (err) {
-      console.error("Google Cloud API Error:", err);
+      // This catch block will now only be reached if
+      // the translation fails for other reasons, OR
+      // after the maximum number of retries (e.g., 3 attempts) has been exhausted.
+      console.error("Translation and API Error:", err);
       socket.emit("sttError", { message: "Failed to process audio." });
     }
   });
