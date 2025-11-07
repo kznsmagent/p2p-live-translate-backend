@@ -1,4 +1,4 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+/* const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "gemini_api_key";
 
@@ -25,7 +25,7 @@ async function translateTextWithGemini(textToTranslate) {
   }
 }
 
-module.exports = translateTextWithGemini;
+module.exports = translateTextWithGemini; */
 
 /* 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -100,3 +100,46 @@ async function translateTextWithGemini(text, maxRetries = 3) {
 
 module.exports = translateTextWithGemini;
  */
+
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "gemini_api_key";
+
+// Utility function for robust translation
+async function translateTextWithGemini(textToTranslate) {
+  // ... (API key check remains the same)
+
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+  // 1. Define the complete prompt
+  const fullPrompt = `Translate the following Burmese sentence into English: "${textToTranslate}"`;
+
+  // 2. ⭐ FIX: Pass the content as an explicit array of Parts/Content objects
+  const contents = [
+    {
+      role: "user", // Specify the role
+      parts: [
+        { text: fullPrompt }, // Pass the prompt text
+      ],
+    },
+  ];
+
+  try {
+    // Pass the structured 'contents' array instead of the raw string
+    const result = await model.generateContent({ contents }); // Use object syntax for clarity
+
+    // Using result.text is the preferred way to get the response text in one go
+    const translatedText = result.text.trim();
+
+    console.log(`Original: "${textToTranslate}"`);
+    console.log(`Translated: "${translatedText}"`);
+    return translatedText;
+  } catch (error) {
+    console.error("Error translating text:", error);
+    // Re-throw the error so index.js can handle the final failure
+    throw error;
+  }
+}
+
+module.exports = translateTextWithGemini;
