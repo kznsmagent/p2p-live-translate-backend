@@ -130,7 +130,7 @@ async function translateTextWithGemini(textToTranslate) {
     const result = await model.generateContent({ contents }); // Use object syntax for clarity
 
     // Using result.text is the preferred way to get the response text in one go
-    const translatedText = result.text.trim();
+    const translatedText = result.text;
 
     console.log(`Original: "${textToTranslate}"`);
     console.log(`Translated: "${translatedText}"`);
