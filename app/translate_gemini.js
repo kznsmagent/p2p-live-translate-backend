@@ -58,7 +58,7 @@ async function translateTextWithGemini(text, maxRetries = 3) {
       const model = "gemini-1.5-flash"; // Use a fast model for translation
 
       const response = await ai.getGenerativeModel({ model }).generateContent({
-        contents: `Translate the following recognized text into conversational English. Do not include any extra commentary, just the translation: "${text}"`,
+        contents: `Translate the following Burmese sentence into English: "${text}"`,
       });
 
       // Successful translation
