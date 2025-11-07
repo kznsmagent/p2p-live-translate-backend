@@ -1,14 +1,14 @@
-/* const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const API_KEY = process.env.API_KEY || "gemini_api_key";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "gemini_api_key";
 
 async function translateTextWithGemini(textToTranslate) {
-  if (!API_KEY) {
+  if (!GEMINI_API_KEY) {
     console.error("API key not found. Please set it in your .env file.");
     return;
   }
 
-  const genAI = new GoogleGenerativeAI(API_KEY);
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const prompt = `Translate the following Burmese sentence into English: "${textToTranslate}"`;
@@ -26,8 +26,8 @@ async function translateTextWithGemini(textToTranslate) {
 }
 
 module.exports = translateTextWithGemini;
- */
 
+/* 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // Assumes the API key is set in an environment variable
@@ -47,7 +47,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * @param {string} text - The text to translate.
  * @param {number} maxRetries - The maximum number of times to retry on a 429 error.
  * @returns {Promise<string>} The translated text.
- */
+
 async function translateTextWithGemini(text, maxRetries = 3) {
   let attempt = 0;
   const initialDelay = 1000; // Start with 1 second delay
@@ -99,3 +99,4 @@ async function translateTextWithGemini(text, maxRetries = 3) {
 }
 
 module.exports = translateTextWithGemini;
+ */
