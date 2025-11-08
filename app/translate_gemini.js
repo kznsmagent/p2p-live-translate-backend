@@ -113,7 +113,8 @@ async function translateTextWithGemini(textToTranslate) {
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   // 1. Define the complete prompt
-  const fullPrompt = `Translate the following Burmese sentence into English: "${textToTranslate}"`;
+  // New, restrictive prompt:
+  const fullPrompt = `Translate the following Burmese sentence into English. Respond with *only* the translated English sentence and no other text, options, or explanations: "${textToTranslate}"`;
 
   // 2. ⭐ FIX: Pass the content as an explicit array of Parts/Content objects
   const contents = [
@@ -128,9 +129,8 @@ async function translateTextWithGemini(textToTranslate) {
   try {
     // Pass the structured 'contents' array instead of the raw string
     const result = await model.generateContent({ contents }); // Use object syntax for clarity
-
     // Using result.text is the preferred way to get the response text in one go
-    const translatedText = result.text;
+    const translatedText = result.response.candidates[0].content.parts[0].text;
 
     console.log(`Original: "${textToTranslate}"`);
     console.log(`Translated: "${translatedText}"`);

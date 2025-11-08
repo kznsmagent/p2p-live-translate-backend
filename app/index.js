@@ -99,7 +99,6 @@ IO.on("connection", (socket) => {
 
   socket.on("audioRecording", async (data) => {
     const sttLocale = data.language || "my-MM";
-
     try {
       const isBurmeseSpeaker = sttLocale === "my-MM";
       const translateSource = isBurmeseSpeaker ? "my-MM" : "en-US";
@@ -110,7 +109,6 @@ IO.on("connection", (socket) => {
         translateSource,
         translateTarget
       );
-
       if (isBurmeseSpeaker) {
         // ⭐ This line now has built-in retry logic!
         translatedText = await translateTextWithGemini(recognizedText);
