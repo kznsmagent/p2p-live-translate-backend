@@ -103,10 +103,14 @@ module.exports = translateTextWithGemini;
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "gemini_api_key";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "gemini-api-key";
 
 // Utility function for robust translation
-async function translateTextWithGemini(textToTranslate) {
+async function translateTextWithGemini(
+  textToTranslate,
+  sourceLanguage,
+  targetLanguage
+) {
   // ... (API key check remains the same)
 
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);

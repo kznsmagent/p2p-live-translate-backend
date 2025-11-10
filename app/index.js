@@ -11,9 +11,9 @@ app.use(express.json());
 
 //-------------------------------LIVEKIT-------------------
 // TODO: replace with your LiveKit API Key/Secret from dashboard
-const LIVEKIT_API_KEY = process.env.LIVEKIT_API_KEY || "livekit_api_key";
+const LIVEKIT_API_KEY = process.env.LIVEKIT_API_KEY || "livekit-api-key";
 const LIVEKIT_API_SECRET =
-  process.env.LIVEKIT_API_SECRET || "livekit_secret_key";
+  process.env.LIVEKIT_API_SECRET || "livekit-api-secret";
 
 console.log(`🔑 Debug Key: ${LIVEKIT_API_KEY}`);
 console.log(`🤫 Debug Secret: ${LIVEKIT_API_SECRET.substring(0, 4)}...`);
@@ -97,7 +97,7 @@ IO.on("connection", (socket) => {
     socket.to(data.calleeId).emit("callEnded", { from: socket.user });
   });
 
-  socket.on("audioRecording", async (data) => {
+  /*   socket.on("audioRecording", async (data) => {
     const sttLocale = data.language || "my-MM";
     try {
       const isBurmeseSpeaker = sttLocale === "my-MM";
@@ -125,7 +125,13 @@ IO.on("connection", (socket) => {
         to: data.to,
       };
       // Send result to the peer
-      if (data.to) socket.to(data.to).emit("sttResult", resultPayload);
+      //if (data.to)  socket.to(data.to).emit("sttResult", resultPayload);
+      socket.emit("sttResult", {
+        text: recognizedText,
+        translated: translatedText,
+        from: socket.user,
+        to: data.to,
+      });
     } catch (err) {
       // This catch block will now only be reached if
       // the translation fails for other reasons, OR
@@ -134,7 +140,39 @@ IO.on("connection", (socket) => {
       socket.emit("sttError", { message: "Failed to process audio." });
     }
   });
+ */
 
+  socket.on("audioRecording", async (data) => {
+    const { language, to, audio: base64Audio } = data;
+
+    try {
+      const audioBuffer = Buffer.from(base64Audio, "base64");
+      console.log(`Received audio: ${audioBuffer.length} bytes`);
+
+      const result = await translateSpeechFromBase64(
+        audioBuffer,
+        language === "my-MM" ? "my-MM" : "en-US",
+        language === "my-MM" ? "en" : "my"
+      );
+      const geminiText = translateTextWithGemini(
+        result.translatedText,
+        language === "my-MM" ? "Burmese" : "English",
+        language === "my-MM" ? "English" : "Burmese"
+      );
+      console.log(
+        `🔥 Recognized Text: ${result.recognizedText}\n✅Translated Text: ${result.translatedText}\n✅Gemini Text: ${geminiText}`
+      );
+      socket.to(data.to).emit("sttResult", {
+        text: result.recognizedText,
+        translated: geminiText, //result.translatedText,
+        from: socket.user,
+        to,
+      });
+    } catch (err) {
+      console.error("STT Error:", err.message);
+      socket.emit("sttError", { message: err.message });
+    }
+  });
   socket.on("disconnect", () => {
     console.log(socket.user, "Disconnected");
   });
