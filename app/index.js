@@ -144,7 +144,10 @@ IO.on("connection", (socket) => {
 
   socket.on("audioRecording", async (data) => {
     const { language, to, audio: base64Audio } = data;
-
+    const base64TranslatedAudio = audioBuffer.toString("base64"); // or re-encoded from TTS
+    socket.to(to).emit("playAudio", {
+      audio: base64TranslatedAudio,
+    });
     try {
       const audioBuffer = Buffer.from(base64Audio, "base64");
       console.log(`Received audio: ${audioBuffer.length} bytes`);
