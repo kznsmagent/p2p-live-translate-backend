@@ -155,13 +155,11 @@ IO.on("connection", (socket) => {
         language === "my-MM" ? "en" : "my"
       );
       const geminiText = await translateTextWithGemini(
-        result.translatedText,
+        result.recognizedText,
         language === "my-MM" ? "Burmese" : "English",
         language === "my-MM" ? "English" : "Burmese"
       );
-      console.log(
-        `🔥 Recognized Text: ${result.recognizedText}\n✅Translated Text: ${result.translatedText}\n✅Gemini Text: ${geminiText}`
-      );
+
       socket.to(data.to).emit("sttResult", {
         text: result.recognizedText,
         translated: geminiText, //result.translatedText,
