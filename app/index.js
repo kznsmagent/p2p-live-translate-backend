@@ -154,7 +154,7 @@ IO.on("connection", (socket) => {
         language === "my-MM" ? "my-MM" : "en-US",
         language === "my-MM" ? "en" : "my"
       );
-      const geminiText = translateTextWithGemini(
+      const geminiText = await translateTextWithGemini(
         result.translatedText,
         language === "my-MM" ? "Burmese" : "English",
         language === "my-MM" ? "English" : "Burmese"
