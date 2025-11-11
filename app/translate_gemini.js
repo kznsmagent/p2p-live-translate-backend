@@ -118,7 +118,7 @@ async function translateTextWithGemini(
 
   // 1. Define the complete prompt
   // New, restrictive prompt:
-  const fullPrompt = `Translate the following Burmese sentence into English. Respond with *only* the translated English sentence and no other text, options, or explanations: "${textToTranslate}"`;
+  const fullPrompt = `Translate the following ${sourceLanguage} sentence into ${targetLanguage}. Respond with *only* the translated ${targetLanguage} sentence and no other text, options, or explanations: "${textToTranslate}"`;
 
   // 2. ⭐ FIX: Pass the content as an explicit array of Parts/Content objects
   const contents = [
