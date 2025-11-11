@@ -45,13 +45,13 @@ async function translateSpeechFromBase64(
       translationRecognizer.recognizeOnceAsync((result) => {
         switch (result.reason) {
           case ResultReason.TranslatedSpeech:
-            console.log(`RECOGNIZED: Text=${result.text}`);
+            /*  console.log(`RECOGNIZED: Text=${result.text}`);
             console.log(
               `Translated into [${targetLanguage}]: ${result.translations.get(
                 targetLanguage
               )}`
             );
-
+ */
             const translationResult = {
               recognizedText: result.text,
               translatedText: result.translations.get(targetLanguage),
@@ -63,7 +63,7 @@ async function translateSpeechFromBase64(
             break;
 
           case ResultReason.NoMatch:
-            console.log("NOMATCH: Speech could not be recognized.");
+            /* console.log("NOMATCH: Speech could not be recognized."); */
             reject(new Error("Speech could not be recognized"));
             break;
 
