@@ -1,3 +1,6 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
 const { Server } = require("socket.io");
 const express = require("express");
 const http = require("http");
@@ -97,61 +100,19 @@ IO.on("connection", (socket) => {
     socket.to(data.calleeId).emit("callEnded", { from: socket.user });
   });
 
-  /*   socket.on("audioRecording", async (data) => {
-    const sttLocale = data.language || "my-MM";
-    try {
-      const isBurmeseSpeaker = sttLocale === "my-MM";
-      const translateSource = isBurmeseSpeaker ? "my-MM" : "en-US";
-      const translateTarget = isBurmeseSpeaker ? "en" : "my";
-
-      var { recognizedText, translatedText } = await translateSpeechFromBase64(
-        data.audio.toString("base64"),
-        translateSource,
-        translateTarget
-      );
-      if (isBurmeseSpeaker) {
-        // ⭐ This line now has built-in retry logic!
-        translatedText = await translateTextWithGemini(recognizedText);
-      }
-      console.log(
-        `🔥 Recognized Text: ${recognizedText}\n✅Translated Text: ${translatedText}`
-      );
-
-      // ... rest of the successful code ...
-      const resultPayload = {
-        text: recognizedText,
-        translated: translatedText,
-        from: socket.user,
-        to: data.to,
-      };
-      // Send result to the peer
-      //if (data.to)  socket.to(data.to).emit("sttResult", resultPayload);
-      socket.emit("sttResult", {
-        text: recognizedText,
-        translated: translatedText,
-        from: socket.user,
-        to: data.to,
-      });
-    } catch (err) {
-      // This catch block will now only be reached if
-      // the translation fails for other reasons, OR
-      // after the maximum number of retries (e.g., 3 attempts) has been exhausted.
-      console.error("Translation and API Error:", err);
-      socket.emit("sttError", { message: "Failed to process audio." });
-    }
+  socket.on("voice", async (data) => {
+    const { to, voice } = data;
+    socket.to(to).emit("playVoice", {
+      voice: voice,
+    });
   });
- */
-
   socket.on("audioRecording", async (data) => {
     const { language, to, audio: base64Audio } = data;
 
     try {
       const audioBuffer = Buffer.from(base64Audio, "base64");
-      console.log(`Received audio: ${audioBuffer.length} bytes`);
-      const base64TranslatedAudio = audioBuffer.toString("base64"); // or re-encoded from TTS
-      socket.to(to).emit("playAudio", {
-        audio: base64TranslatedAudio,
-      });
+      console.log(`Received audio bytes`);
+      //------for-recognize-translate-----
       const result = await translateSpeechFromBase64(
         audioBuffer,
         language === "my-MM" ? "my-MM" : "en-US",
@@ -163,7 +124,7 @@ IO.on("connection", (socket) => {
         language === "my-MM" ? "English" : "Burmese"
       );
 
-      socket.to(data.to).emit("sttResult", {
+      socket.emit("sttResult", {
         text: result.recognizedText,
         translated: geminiText, //result.translatedText,
         from: socket.user,
@@ -174,7 +135,7 @@ IO.on("connection", (socket) => {
       socket.emit("sttError", { message: err.message });
     }
   });
-  socket.on("disconnect", () => {
+  socket.to(to).on("disconnect", () => {
     console.log(socket.user, "Disconnected");
   });
 });
