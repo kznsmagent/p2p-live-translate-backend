@@ -1,6 +1,6 @@
-const dotenv = require("dotenv");
+/* const dotenv = require("dotenv");
 dotenv.config();
-
+ */
 const { Server } = require("socket.io");
 const express = require("express");
 const http = require("http");
@@ -124,7 +124,7 @@ IO.on("connection", (socket) => {
         language === "my-MM" ? "English" : "Burmese"
       );
 
-      socket.emit("sttResult", {
+      socket.to(to).emit("sttResult", {
         text: result.recognizedText,
         translated: geminiText, //result.translatedText,
         from: socket.user,
@@ -135,7 +135,7 @@ IO.on("connection", (socket) => {
       socket.emit("sttError", { message: err.message });
     }
   });
-  socket.to(to).on("disconnect", () => {
+  socket.on("disconnect", () => {
     console.log(socket.user, "Disconnected");
   });
 });
