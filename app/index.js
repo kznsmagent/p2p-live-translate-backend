@@ -130,6 +130,12 @@ IO.on("connection", (socket) => {
         from: socket.user,
         to,
       });
+      socket.emit("sttResult", {
+        text: result.recognizedText,
+        translated: geminiText, //result.translatedText,
+        from: socket.user,
+        to,
+      });
     } catch (err) {
       console.error("STT Error:", err.message);
       socket.emit("sttError", { message: err.message });
